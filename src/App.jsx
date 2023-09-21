@@ -3,7 +3,7 @@ import "./App.css";
 import Play from "../components/play";
 import { FiSend } from "react-icons/fi";
 
-const ws = new WebSocket("ws://localhost:3000/cable");
+const ws = new WebSocket("ws://localhost:3000/cable", "echo-protocol");
 
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -191,7 +191,7 @@ function App() {
 									type="submit"
 									className="w-[10rem] py-3 rounded-lg text-white border border-white"
 								>
-									Next
+									Budal
 								</button>
 							</form>
 						</div>
