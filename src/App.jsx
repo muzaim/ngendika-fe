@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import Play from "../components/play";
+import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { FiSend } from "react-icons/fi";
+import { MdOutlineEmojiEmotions } from "react-icons/md";
 
 const ws = new WebSocket("ws://localhost:3000/cable", "echo-protocol");
 
@@ -25,6 +27,8 @@ function App() {
 		username: "",
 		avatar: "",
 	});
+	const [showEmojiDiv, setShowEmojiDiv] = useState(false);
+	const [inputStr, setInputStr] = useState("");
 
 	useEffect(() => {
 		AOS.init();
@@ -71,6 +75,7 @@ function App() {
 		e.preventDefault();
 		const body = e.target.message.value;
 		e.target.message.value = "";
+		setInputStr("");
 		if (!body) {
 			return;
 		}
@@ -112,6 +117,10 @@ function App() {
 		return `${hours}:${minutes}`;
 	}
 
+	function onClickEmoji(emojiObject) {
+		setInputStr((prevInput) => prevInput + emojiObject.emoji);
+		setShowEmojiDiv(false);
+	}
 	const handleClick = (gameState) => {
 		setGame(gameState);
 	};
@@ -405,15 +414,43 @@ function App() {
 												className="relative w-full"
 											>
 												<input
-													className="w-full py-4 pl-4 pr-12 rounded-b-3xl bg-white focus:outline-none group text-md text-slate-600"
+													className="w-full py-4 pl-4 pr-20 rounded-b-3xl bg-white focus:outline-none group text-md text-slate-600"
 													placeholder="Tulis opo wae..."
 													name="message"
 													type="text"
+													value={inputStr}
+													onChange={(e) =>
+														setInputStr(
+															e.target.value
+														)
+													}
+												/>
+
+												<MdOutlineEmojiEmotions
+													className={`text-[1.5rem] text-blue-500 absolute top-1/2 right-12 transform -translate-y-1/2 cursor-pointer`}
+													onClick={() => {
+														setShowEmojiDiv(
+															!showEmojiDiv
+														);
+													}}
 												/>
 												<FiSend
 													className={`text-[1.5rem] text-blue-500 absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer`}
 												/>
 											</form>
+											{showEmojiDiv && (
+												<div className="absolute bottom-[3.6rem] right-0">
+													<EmojiPicker
+														onEmojiClick={
+															onClickEmoji
+														}
+														autoFocusSearch={false}
+														emojiStyle={
+															EmojiStyle.NATIVE
+														}
+													/>
+												</div>
+											)}
 										</div>
 									</div>
 								</div>
