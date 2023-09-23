@@ -62,30 +62,47 @@ function App({ cable }) {
 	// }, [user.id, recipient.id, setMessages]);
 
 	useEffect(() => {
+		setGuid(Math.random().toString(36).substring(2, 15));
 		cable.subscriptions.create(
 			{
+				id: guid,
 				channel: "MessagesChannel",
-				id: Math.random().toString(36).substring(2, 15),
 			},
 			{
 				connected() {
 					console.log("WebSocket connected");
 				},
-				received: (message) => {
-					setMessages([...messages, message]);
-				},
+				// received: (message) => {
+				// 	// setMessagesAndScrollDown([...messages, message]);
+				// 	console.log(message);
+				// },
 			}
 		);
 	}, []);
 
 	const handleSubmit = async (e) => {
+		// e.preventDefault();
+		// const body = e.target.message.value;
+		// e.target.message.value = "";
+		// setInputStr("");
+		// if (!body) {
+		// 	return;
+		// }
+		// await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
+		// 	method: "POST",
+		// 	headers: {
+		// 		"Content-Type": "application/json",
+		// 	},
+		// 	body: JSON.stringify({
+		// 		body,
+		// 		sender: dataUser.username,
+		// 		avatar: dataUser.avatar,
+		// 	}),
+		// });
 		e.preventDefault();
 		const body = e.target.message.value;
 		e.target.message.value = "";
 		setInputStr("");
-		if (!body) {
-			return;
-		}
 		await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
 			method: "POST",
 			headers: {
@@ -172,6 +189,8 @@ function App({ cable }) {
 	};
 
 	const resetScroll = () => {
+		// fetchMessages();
+
 		if (!messagesContainerRef) return;
 		messagesContainerRef.scrollTop = messagesContainerRef.scrollHeight;
 	};
