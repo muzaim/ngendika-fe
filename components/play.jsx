@@ -8,6 +8,7 @@ const ws = new WebSocket(
 	`wss:${import.meta.env.VITE_API_URL}/cable`,
 	"echo-protocol"
 );
+
 const Play = (props) => {
 	const [messages, setMessages] = useState([]);
 	const [guid, setGuid] = useState("");
