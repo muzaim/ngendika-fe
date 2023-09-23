@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import Play from "../components/play";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { FiSend } from "react-icons/fi";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 // import cable from "./WebSocketService";
 
-// const ws = new WebSocket(
-// 	`wss:${import.meta.env.VITE_API_URL}/cable`,
-// 	"echo-protocol"
-// );
+const ws = new WebSocket(
+	`wss:${import.meta.env.VITE_API_URL}/cable`,
+	"echo-protocol"
+);
 
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -24,7 +23,7 @@ const Avatar7 = "/avatar/avatar7-removebg-preview.png";
 const Avatar8 = "/avatar/avatar8-removebg-preview.png";
 const Avatar9 = "/avatar/avatar9-removebg-preview.png";
 
-function App({ cable }) {
+function App() {
 	const [game, setGame] = useState("setUsername");
 	const [error, setError] = useState("");
 	const [dataUser, setDataUser] = useState({
@@ -61,107 +60,47 @@ function App({ cable }) {
 	// 	}
 	// }, [user.id, recipient.id, setMessages]);
 
-	useEffect(() => {
-		setGuid(Math.random().toString(36).substring(2, 15));
-		cable.subscriptions.create(
-			{
-				id: guid,
-				channel: "MessagesChannel",
-			},
-			{
-				connected() {
-					console.log("WebSocket connected");
-				},
-				// received: (message) => {
-				// 	// setMessagesAndScrollDown([...messages, message]);
-				// 	console.log(message);
-				// },
-			}
-		);
-	}, []);
-
-	const handleSubmit = async (e) => {
-		// e.preventDefault();
-		// const body = e.target.message.value;
-		// e.target.message.value = "";
-		// setInputStr("");
-		// if (!body) {
-		// 	return;
-		// }
-		// await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
-		// 	method: "POST",
-		// 	headers: {
-		// 		"Content-Type": "application/json",
-		// 	},
-		// 	body: JSON.stringify({
-		// 		body,
-		// 		sender: dataUser.username,
-		// 		avatar: dataUser.avatar,
-		// 	}),
-		// });
-		e.preventDefault();
-		const body = e.target.message.value;
-		e.target.message.value = "";
-		setInputStr("");
-		await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				body,
-				sender: dataUser.username,
-				avatar: dataUser.avatar,
-			}),
-		});
-	};
-	// ====================================================================
-
-	useEffect(() => {
-		AOS.init();
-	}, []);
-
-	// ws.onopen = () => {
+	// useEffect(() => {
 	// 	setGuid(Math.random().toString(36).substring(2, 15));
-
-	// 	ws.send(
-	// 		JSON.stringify({
-	// 			command: "subscribe",
-	// 			identifier: JSON.stringify({
-	// 				id: guid,
-	// 				channel: "MessagesChannel",
-	// 			}),
-	// 		})
+	// 	cable.subscriptions.create(
+	// 		{
+	// 			id: guid,
+	// 			channel: "MessagesChannel",
+	// 		},
+	// 		{
+	// 			connected() {
+	// 				console.log("WebSocket connected");
+	// 			},
+	// 			received: (message) => {
+	// 				setMessagesAndScrollDown([...messages, message]);
+	// 			},
+	// 		}
 	// 	);
-	// };
-
-	// ws.onmessage = (e) => {
-	// 	const data = JSON.parse(e.data);
-	// 	if (data.type === "ping") return;
-	// 	if (data.type === "welcome") return;
-	// 	if (data.type === "confirm_subscription") return;
-
-	// 	const message = data.message;
-	// 	setMessagesAndScrollDown([...messages, message]);
-	// };
-
-	useEffect(() => {
-		fetchMessages();
-		resetScroll();
-	}, []);
-
-	useEffect(() => {
-		resetScroll();
-	}, [messages]);
+	// }, []);
 
 	// const handleSubmit = async (e) => {
+	// e.preventDefault();
+	// const body = e.target.message.value;
+	// e.target.message.value = "";
+	// setInputStr("");
+	// if (!body) {
+	// 	return;
+	// }
+	// await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
+	// 	method: "POST",
+	// 	headers: {
+	// 		"Content-Type": "application/json",
+	// 	},
+	// 	body: JSON.stringify({
+	// 		body,
+	// 		sender: dataUser.username,
+	// 		avatar: dataUser.avatar,
+	// 	}),
+	// });
 	// 	e.preventDefault();
 	// 	const body = e.target.message.value;
 	// 	e.target.message.value = "";
 	// 	setInputStr("");
-	// 	if (!body) {
-	// 		return;
-	// 	}
 	// 	await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
 	// 		method: "POST",
 	// 		headers: {
@@ -174,6 +113,65 @@ function App({ cable }) {
 	// 		}),
 	// 	});
 	// };
+	// ====================================================================
+
+	useEffect(() => {
+		AOS.init();
+	}, []);
+
+	ws.onopen = () => {
+		setGuid(Math.random().toString(36).substring(2, 15));
+
+		ws.send(
+			JSON.stringify({
+				command: "subscribe",
+				identifier: JSON.stringify({
+					id: guid,
+					channel: "MessagesChannel",
+				}),
+			})
+		);
+	};
+
+	ws.onmessage = (e) => {
+		const data = JSON.parse(e.data);
+		if (data.type === "ping") return;
+		if (data.type === "welcome") return;
+		if (data.type === "confirm_subscription") return;
+
+		const message = data.message;
+		setMessagesAndScrollDown([...messages, message]);
+	};
+
+	useEffect(() => {
+		fetchMessages();
+		resetScroll();
+	}, []);
+
+	useEffect(() => {
+		resetScroll();
+	}, [messages]);
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		const body = e.target.message.value;
+		e.target.message.value = "";
+		setInputStr("");
+		if (!body) {
+			return;
+		}
+		await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				body,
+				sender: dataUser.username,
+				avatar: dataUser.avatar,
+			}),
+		});
+	};
 
 	const fetchMessages = async () => {
 		const response = await fetch(
@@ -189,8 +187,6 @@ function App({ cable }) {
 	};
 
 	const resetScroll = () => {
-		// fetchMessages();
-
 		if (!messagesContainerRef) return;
 		messagesContainerRef.scrollTop = messagesContainerRef.scrollHeight;
 	};
