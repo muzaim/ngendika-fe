@@ -4,16 +4,11 @@ import Play from "../components/play";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { FiSend } from "react-icons/fi";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
-import ActionCable from "actioncable";
 
-var ws = ActionCable.createConsumer(
-	`wss:${import.meta.env.VITE_API_URL}/cable`
+const ws = new WebSocket(
+	`wss:${import.meta.env.VITE_API_URL}/cable`,
+	"echo-protocol"
 );
-
-// const ws = new WebSocket(
-// 	`wss:${import.meta.env.VITE_API_URL}/cable`,
-// 	"echo-protocol"
-// );
 
 import AOS from "aos";
 import "aos/dist/aos.css";
