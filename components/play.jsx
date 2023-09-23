@@ -4,10 +4,16 @@ import { FiSend } from "react-icons/fi";
 
 import "../src/index.css";
 
-const ws = new WebSocket(
-	`wss:${import.meta.env.VITE_API_URL}/cable`,
-	"echo-protocol"
+import ActionCable from "actioncable";
+
+var ws = ActionCable.createConsumer(
+	`wss:${import.meta.env.VITE_API_URL}/cable`
 );
+
+// const ws = new WebSocket(
+// 	`wss:${import.meta.env.VITE_API_URL}/cable`,
+// 	"echo-protocol"
+// );
 
 const Play = (props) => {
 	const [messages, setMessages] = useState([]);
