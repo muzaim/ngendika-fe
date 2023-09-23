@@ -23,7 +23,7 @@ const Avatar7 = "/avatar/avatar7-removebg-preview.png";
 const Avatar8 = "/avatar/avatar8-removebg-preview.png";
 const Avatar9 = "/avatar/avatar9-removebg-preview.png";
 
-function App() {
+function App({ cable }) {
 	const [game, setGame] = useState("setUsername");
 	const [error, setError] = useState("");
 	const [dataUser, setDataUser] = useState({
@@ -33,15 +33,17 @@ function App() {
 	const [showEmojiDiv, setShowEmojiDiv] = useState(false);
 	const [inputStr, setInputStr] = useState("");
 
-	useEffect(() => {
-		AOS.init();
-	}, []);
-	// useEffect(() => {
-	// 	console.log(import.meta.env.VITE_API_URL); // 123
-	// }, []);
 	const [messages, setMessages] = useState([]);
 	const [guid, setGuid] = useState("");
 	const messagesContainerRef = document.getElementById("messagesContainer");
+
+	// ====================================================================
+
+	// ====================================================================
+
+	useEffect(() => {
+		AOS.init();
+	}, []);
 
 	ws.onopen = () => {
 		setGuid(Math.random().toString(36).substring(2, 15));
