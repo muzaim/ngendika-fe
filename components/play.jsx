@@ -4,7 +4,10 @@ import { FiSend } from "react-icons/fi";
 
 import "../src/index.css";
 
-const ws = new WebSocket("ws://localhost:3000/cable");
+const ws = new WebSocket(
+	`wss:${import.meta.env.VITE_API_URL}/cable`,
+	"echo-protocol"
+);
 const Play = (props) => {
 	const [messages, setMessages] = useState([]);
 	const [guid, setGuid] = useState("");
@@ -48,7 +51,7 @@ const Play = (props) => {
 		const body = e.target.message.value;
 		e.target.message.value = "";
 
-		await fetch("http://localhost:3000/messages", {
+		await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -58,7 +61,9 @@ const Play = (props) => {
 	};
 
 	const fetchMessages = async () => {
-		const response = await fetch("http://localhost:3000/messages");
+		const response = await fetch(
+			`${import.meta.env.VITE_API_URL}/messages`
+		);
 		const data = await response.json();
 		setMessagesAndScrollDown(data);
 	};

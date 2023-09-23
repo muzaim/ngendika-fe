@@ -5,7 +5,10 @@ import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { FiSend } from "react-icons/fi";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 
-const ws = new WebSocket("ws://localhost:3000/cable", "echo-protocol");
+const ws = new WebSocket(
+	`wss:${import.meta.env.VITE_API_URL}/cable`,
+	"echo-protocol"
+);
 
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -33,7 +36,9 @@ function App() {
 	useEffect(() => {
 		AOS.init();
 	}, []);
-
+	// useEffect(() => {
+	// 	console.log(import.meta.env.VITE_API_URL); // 123
+	// }, []);
 	const [messages, setMessages] = useState([]);
 	const [guid, setGuid] = useState("");
 	const messagesContainerRef = document.getElementById("messagesContainer");
@@ -79,7 +84,7 @@ function App() {
 		if (!body) {
 			return;
 		}
-		await fetch("http://localhost:3000/messages", {
+		await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -93,7 +98,9 @@ function App() {
 	};
 
 	const fetchMessages = async () => {
-		const response = await fetch("http://localhost:3000/messages");
+		const response = await fetch(
+			`${import.meta.env.VITE_API_URL}/messages`
+		);
 		const data = await response.json();
 		setMessagesAndScrollDown(data);
 	};
@@ -351,7 +358,7 @@ function App() {
 														<div className="bubble right min-w-[200px]">
 															<div className="flex justify-between items-center ">
 																<p className=" tracking-wider text-slate-800 capitalize">
-																	You
+																	Koe
 																</p>
 																<p className="text-gray-400 text-sm tracking-wider">
 																	{formatDateToHHMM(
