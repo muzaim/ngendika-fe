@@ -4,11 +4,12 @@ import Play from "../components/play";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { FiSend } from "react-icons/fi";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
+// import cable from "./WebSocketService";
 
-const ws = new WebSocket(
-	`wss:${import.meta.env.VITE_API_URL}/cable`,
-	"echo-protocol"
-);
+// const ws = new WebSocket(
+// 	`wss:${import.meta.env.VITE_API_URL}/cable`,
+// 	"echo-protocol"
+// );
 
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -32,51 +33,50 @@ function App({ cable }) {
 	});
 	const [showEmojiDiv, setShowEmojiDiv] = useState(false);
 	const [inputStr, setInputStr] = useState("");
-
 	const [messages, setMessages] = useState([]);
 	const [guid, setGuid] = useState("");
 	const messagesContainerRef = document.getElementById("messagesContainer");
 
 	// ====================================================================
-
-	// ====================================================================
+	// useEffect(() => {
+	// 	if (user.id) {
+	// 		fetch(`/api/users/${user.id}/message_history`, {
+	// 			method: "POST",
+	// 			headers: {
+	// 				"Content-Type": "application/json",
+	// 			},
+	// 			body: JSON.stringify({
+	// 				sender_id: user.id,
+	// 				recipient_id: recipient.id,
+	// 				// page: 1
+	// 			}),
+	// 		}).then((r) => {
+	// 			if (r.ok) {
+	// 				r.json().then((data) => {
+	// 					setMessages(data);
+	// 					setPairId(data[0]["pair_id"]);
+	// 				});
+	// 			}
+	// 		});
+	// 	}
+	// }, [user.id, recipient.id, setMessages]);
 
 	useEffect(() => {
-		AOS.init();
-	}, []);
-
-	ws.onopen = () => {
-		setGuid(Math.random().toString(36).substring(2, 15));
-
-		ws.send(
-			JSON.stringify({
-				command: "subscribe",
-				identifier: JSON.stringify({
-					id: guid,
-					channel: "MessagesChannel",
-				}),
-			})
+		cable.subscriptions.create(
+			{
+				channel: "MessagesChannel",
+				id: Math.random().toString(36).substring(2, 15),
+			},
+			{
+				connected() {
+					console.log("WebSocket connected");
+				},
+				received: (message) => {
+					setMessages([...messages, message]);
+				},
+			}
 		);
-	};
-
-	ws.onmessage = (e) => {
-		const data = JSON.parse(e.data);
-		if (data.type === "ping") return;
-		if (data.type === "welcome") return;
-		if (data.type === "confirm_subscription") return;
-
-		const message = data.message;
-		setMessagesAndScrollDown([...messages, message]);
-	};
-
-	useEffect(() => {
-		fetchMessages();
-		resetScroll();
 	}, []);
-
-	useEffect(() => {
-		resetScroll();
-	}, [messages]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -98,6 +98,65 @@ function App({ cable }) {
 			}),
 		});
 	};
+	// ====================================================================
+
+	useEffect(() => {
+		AOS.init();
+	}, []);
+
+	// ws.onopen = () => {
+	// 	setGuid(Math.random().toString(36).substring(2, 15));
+
+	// 	ws.send(
+	// 		JSON.stringify({
+	// 			command: "subscribe",
+	// 			identifier: JSON.stringify({
+	// 				id: guid,
+	// 				channel: "MessagesChannel",
+	// 			}),
+	// 		})
+	// 	);
+	// };
+
+	// ws.onmessage = (e) => {
+	// 	const data = JSON.parse(e.data);
+	// 	if (data.type === "ping") return;
+	// 	if (data.type === "welcome") return;
+	// 	if (data.type === "confirm_subscription") return;
+
+	// 	const message = data.message;
+	// 	setMessagesAndScrollDown([...messages, message]);
+	// };
+
+	useEffect(() => {
+		fetchMessages();
+		resetScroll();
+	}, []);
+
+	useEffect(() => {
+		resetScroll();
+	}, [messages]);
+
+	// const handleSubmit = async (e) => {
+	// 	e.preventDefault();
+	// 	const body = e.target.message.value;
+	// 	e.target.message.value = "";
+	// 	setInputStr("");
+	// 	if (!body) {
+	// 		return;
+	// 	}
+	// 	await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
+	// 		method: "POST",
+	// 		headers: {
+	// 			"Content-Type": "application/json",
+	// 		},
+	// 		body: JSON.stringify({
+	// 			body,
+	// 			sender: dataUser.username,
+	// 			avatar: dataUser.avatar,
+	// 		}),
+	// 	});
+	// };
 
 	const fetchMessages = async () => {
 		const response = await fetch(
