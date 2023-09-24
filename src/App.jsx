@@ -6,7 +6,7 @@ import { MdOutlineEmojiEmotions } from "react-icons/md";
 // import cable from "./WebSocketService";
 
 const ws = new WebSocket(
-	`ws:${import.meta.env.VITE_API_URL}/cable`,
+	`wss:${import.meta.env.VITE_API_URL}/cable`,
 	"echo-protocol"
 );
 
@@ -117,6 +117,7 @@ function App() {
 
 	useEffect(() => {
 		AOS.init();
+		console.log(`wss:${import.meta.env.VITE_API_URL}/cable`);
 	}, []);
 
 	ws.onopen = () => {
@@ -145,7 +146,6 @@ function App() {
 
 	useEffect(() => {
 		fetchMessages();
-		resetScroll();
 	}, []);
 
 	useEffect(() => {
