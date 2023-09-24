@@ -6,7 +6,7 @@ import { MdOutlineEmojiEmotions } from "react-icons/md";
 // import cable from "./WebSocketService";
 
 const ws = new WebSocket(
-	`wss:${import.meta.env.VITE_API_URL}/cable`,
+	`ws:${import.meta.env.VITE_API_URL}/cable`,
 	"echo-protocol"
 );
 
