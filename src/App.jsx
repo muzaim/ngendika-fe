@@ -1,15 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { FiSend } from "react-icons/fi";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 // import cable from "./WebSocketService";
-import ActionCable from "actioncable";
 
-// const ws = new WebSocket(
-// 	`wss:${import.meta.env.VITE_API_URL}/cable`,
-// 	"echo-protocol"
-// );
+const ws = new WebSocket(
+	`wss:${import.meta.env.VITE_API_URL}/cable`,
+	"echo-protocol"
+);
 
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -37,87 +36,71 @@ function App() {
 	const [guid, setGuid] = useState("");
 	const messagesContainerRef = document.getElementById("messagesContainer");
 
-	// ==============================MODE COBA======================================
-	const [receivedMessage, setReceivedMessage] = useState();
-	const [text, setText] = useState("");
-	const [input, setInput] = useState("");
-
-	const cable = useMemo(
-		() =>
-			ActionCable.createConsumer(
-				`wss:${import.meta.env.VITE_API_URL}/cable`
-			),
-		[]
-	);
-
-	useEffect(() => {
-		const sub = cable.subscriptions.create(
-			{ channel: "MessagesChannel" },
-			{
-				received: (msg) => setReceivedMessage(msg),
-			}
-		);
-		setMessagesAndScrollDown(sub);
-		console.log(`berhasil`);
-	}, [cable]);
-
-	const handleSend = () => {
-		// inputをサーバーに送信
-		subscription?.perform("chat", { body: input });
-		setInput("");
-	};
-
-	useEffect(() => {
-		if (!receivedMessage) return;
-
-		const { sender, body, avatar, created_at, id } = receivedMessage;
-		setText(text.concat("\n", `${sender}: ${body}`));
-	}, [receivedMessage]);
-
-	useEffect(() => {
-		const history = document.getElementById("history");
-		history?.scrollTo(0, history.scrollHeight);
-	}, [text]);
-
-	const onChangeInput = (e) => {
-		setInput(e.currentTarget.value);
-	};
-
-	// ==============================MODE COBA======================================
-
-	// ===================== MODE WS =======================================
-	// ws.onopen = () => {
-	// 	setGuid(Math.random().toString(36).substring(2, 15));
-
-	// 	ws.send(
-	// 		JSON.stringify({
-	// 			command: "subscribe",
-	// 			identifier: JSON.stringify({
-	// 				id: guid,
-	// 				channel: "MessagesChannel",
+	// ====================================================================
+	// useEffect(() => {
+	// 	if (user.id) {
+	// 		fetch(`/api/users/${user.id}/message_history`, {
+	// 			method: "POST",
+	// 			headers: {
+	// 				"Content-Type": "application/json",
+	// 			},
+	// 			body: JSON.stringify({
+	// 				sender_id: user.id,
+	// 				recipient_id: recipient.id,
+	// 				// page: 1
 	// 			}),
-	// 		})
+	// 		}).then((r) => {
+	// 			if (r.ok) {
+	// 				r.json().then((data) => {
+	// 					setMessages(data);
+	// 					setPairId(data[0]["pair_id"]);
+	// 				});
+	// 			}
+	// 		});
+	// 	}
+	// }, [user.id, recipient.id, setMessages]);
+
+	// useEffect(() => {
+	// 	setGuid(Math.random().toString(36).substring(2, 15));
+	// 	cable.subscriptions.create(
+	// 		{
+	// 			id: guid,
+	// 			channel: "MessagesChannel",
+	// 		},
+	// 		{
+	// 			connected() {
+	// 				console.log("WebSocket connected");
+	// 			},
+	// 			received: (message) => {
+	// 				setMessagesAndScrollDown([...messages, message]);
+	// 			},
+	// 		}
 	// 	);
-	// };
-
-	// ws.onmessage = (e) => {
-	// 	const data = JSON.parse(e.data);
-	// 	if (data.type === "ping") return;
-	// 	if (data.type === "welcome") return;
-	// 	if (data.type === "confirm_subscription") return;
-
-	// 	const message = data.message;
-	// 	setMessagesAndScrollDown([...messages, message]);
-	// };
+	// }, []);
 
 	// const handleSubmit = async (e) => {
+	// e.preventDefault();
+	// const body = e.target.message.value;
+	// e.target.message.value = "";
+	// setInputStr("");
+	// if (!body) {
+	// 	return;
+	// }
+	// await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
+	// 	method: "POST",
+	// 	headers: {
+	// 		"Content-Type": "application/json",
+	// 	},
+	// 	body: JSON.stringify({
+	// 		body,
+	// 		sender: dataUser.username,
+	// 		avatar: dataUser.avatar,
+	// 	}),
+	// });
 	// 	e.preventDefault();
 	// 	const body = e.target.message.value;
 	// 	e.target.message.value = "";
 	// 	setInputStr("");
-	// 	if (!body) {
-	// 		return;
-	// 	}
 	// 	await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
 	// 		method: "POST",
 	// 		headers: {
@@ -130,7 +113,44 @@ function App() {
 	// 		}),
 	// 	});
 	// };
-	// ===================== MODE WS =======================================
+	// ====================================================================
+
+	useEffect(() => {
+		AOS.init();
+	}, []);
+
+	ws.onopen = () => {
+		setGuid(Math.random().toString(36).substring(2, 15));
+
+		ws.send(
+			JSON.stringify({
+				command: "subscribe",
+				identifier: JSON.stringify({
+					id: guid,
+					channel: "MessagesChannel",
+				}),
+			})
+		);
+	};
+
+	ws.onmessage = (e) => {
+		const data = JSON.parse(e.data);
+		if (data.type === "ping") return;
+		if (data.type === "welcome") return;
+		if (data.type === "confirm_subscription") return;
+
+		const message = data.message;
+		setMessagesAndScrollDown([...messages, message]);
+	};
+
+	useEffect(() => {
+		fetchMessages();
+		resetScroll();
+	}, []);
+
+	useEffect(() => {
+		resetScroll();
+	}, [messages]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -152,18 +172,6 @@ function App() {
 			}),
 		});
 	};
-	useEffect(() => {
-		AOS.init();
-	}, []);
-
-	useEffect(() => {
-		fetchMessages();
-		resetScroll();
-	}, []);
-
-	useEffect(() => {
-		resetScroll();
-	}, [messages]);
 
 	const fetchMessages = async () => {
 		const response = await fetch(
@@ -409,17 +417,6 @@ function App() {
 												Aplikasi chatting gawean Surya
 											</p>
 										</div>
-									</div>
-									<div>
-										<textarea
-											id="history"
-											readOnly
-											style={{
-												width: "500px",
-												height: "200px",
-											}}
-											value={text}
-										/>
 									</div>
 									{/* CHATROOM */}
 									<div
