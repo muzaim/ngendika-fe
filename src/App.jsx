@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+import Play from "../components/play";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { FiSend } from "react-icons/fi";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
-// import cable from "./WebSocketService";
 
-const ws = new WebSocket(
-	`wss:${import.meta.env.VITE_API_URL}/cable`,
-	"echo-protocol"
-);
+const ws = new WebSocket("ws://localhost:3000/cable", "echo-protocol");
 
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -32,93 +29,14 @@ function App() {
 	});
 	const [showEmojiDiv, setShowEmojiDiv] = useState(false);
 	const [inputStr, setInputStr] = useState("");
-	const [messages, setMessages] = useState([]);
-	const [guid, setGuid] = useState("");
-	const messagesContainerRef = document.getElementById("messagesContainer");
-
-	// ====================================================================
-	// useEffect(() => {
-	// 	if (user.id) {
-	// 		fetch(`/api/users/${user.id}/message_history`, {
-	// 			method: "POST",
-	// 			headers: {
-	// 				"Content-Type": "application/json",
-	// 			},
-	// 			body: JSON.stringify({
-	// 				sender_id: user.id,
-	// 				recipient_id: recipient.id,
-	// 				// page: 1
-	// 			}),
-	// 		}).then((r) => {
-	// 			if (r.ok) {
-	// 				r.json().then((data) => {
-	// 					setMessages(data);
-	// 					setPairId(data[0]["pair_id"]);
-	// 				});
-	// 			}
-	// 		});
-	// 	}
-	// }, [user.id, recipient.id, setMessages]);
-
-	// useEffect(() => {
-	// 	setGuid(Math.random().toString(36).substring(2, 15));
-	// 	cable.subscriptions.create(
-	// 		{
-	// 			id: guid,
-	// 			channel: "MessagesChannel",
-	// 		},
-	// 		{
-	// 			connected() {
-	// 				console.log("WebSocket connected");
-	// 			},
-	// 			received: (message) => {
-	// 				setMessagesAndScrollDown([...messages, message]);
-	// 			},
-	// 		}
-	// 	);
-	// }, []);
-
-	// const handleSubmit = async (e) => {
-	// e.preventDefault();
-	// const body = e.target.message.value;
-	// e.target.message.value = "";
-	// setInputStr("");
-	// if (!body) {
-	// 	return;
-	// }
-	// await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
-	// 	method: "POST",
-	// 	headers: {
-	// 		"Content-Type": "application/json",
-	// 	},
-	// 	body: JSON.stringify({
-	// 		body,
-	// 		sender: dataUser.username,
-	// 		avatar: dataUser.avatar,
-	// 	}),
-	// });
-	// 	e.preventDefault();
-	// 	const body = e.target.message.value;
-	// 	e.target.message.value = "";
-	// 	setInputStr("");
-	// 	await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
-	// 		method: "POST",
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 		body: JSON.stringify({
-	// 			body,
-	// 			sender: dataUser.username,
-	// 			avatar: dataUser.avatar,
-	// 		}),
-	// 	});
-	// };
-	// ====================================================================
 
 	useEffect(() => {
 		AOS.init();
-		console.log(`wss:${import.meta.env.VITE_API_URL}/cable`);
 	}, []);
+
+	const [messages, setMessages] = useState([]);
+	const [guid, setGuid] = useState("");
+	const messagesContainerRef = document.getElementById("messagesContainer");
 
 	ws.onopen = () => {
 		setGuid(Math.random().toString(36).substring(2, 15));
@@ -146,6 +64,7 @@ function App() {
 
 	useEffect(() => {
 		fetchMessages();
+		resetScroll();
 	}, []);
 
 	useEffect(() => {
@@ -160,7 +79,7 @@ function App() {
 		if (!body) {
 			return;
 		}
-		await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
+		await fetch("http://localhost:3000/messages", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -174,9 +93,7 @@ function App() {
 	};
 
 	const fetchMessages = async () => {
-		const response = await fetch(
-			`${import.meta.env.VITE_API_URL}/messages`
-		);
+		const response = await fetch("http://localhost:3000/messages");
 		const data = await response.json();
 		setMessagesAndScrollDown(data);
 	};
@@ -434,7 +351,7 @@ function App() {
 														<div className="bubble right min-w-[200px]">
 															<div className="flex justify-between items-center ">
 																<p className=" tracking-wider text-slate-800 capitalize">
-																	Koe
+																	You
 																</p>
 																<p className="text-gray-400 text-sm tracking-wider">
 																	{formatDateToHHMM(
