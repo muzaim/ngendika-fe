@@ -5,7 +5,11 @@ import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { FiSend } from "react-icons/fi";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 
-const ws = new WebSocket("ws://localhost:3000/cable", "echo-protocol");
+// const ws = new WebSocket("ws://localhost:3000/cable", "echo-protocol");
+const ws = new WebSocket(
+	`wss:${import.meta.env.VITE_API_URL}/cable`,
+	"echo-protocol"
+);
 
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -79,7 +83,7 @@ function App() {
 		if (!body) {
 			return;
 		}
-		await fetch("http://localhost:3000/messages", {
+		await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -93,7 +97,9 @@ function App() {
 	};
 
 	const fetchMessages = async () => {
-		const response = await fetch("http://localhost:3000/messages");
+		const response = await fetch(
+			`${import.meta.env.VITE_API_URL}/messages`
+		);
 		const data = await response.json();
 		setMessagesAndScrollDown(data);
 	};
